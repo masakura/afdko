@@ -101,9 +101,9 @@ log = logging.getLogger(__name__)
 curSystem = platform.system()
 
 if curSystem == "Windows":
-    TX_TOOL=subprocess.check_output(["where","tx.exe"]).strip()
+    TX_TOOL = subprocess.check_output(["where", "tx.exe"]).strip()
 else:
-    TX_TOOL=subprocess.check_output(["which", "tx"]).strip()
+    TX_TOOL = subprocess.check_output(["which", "tx"]).strip()
 
 
 INDENT = "  "
@@ -182,7 +182,6 @@ def addClassDef(otlConv, classDefs, coverage, side=None, anchor=None):
         classRec = ClassRecord(otlConv.curLookupIndex,
                                otlConv.curSubTableIndex, classIndex, side)
         otlConv.classesByNameList[key].append(classRec)
-    return
 
 
 def AddMarkClassDef(otlConv, markCoverage, markArray, tag):
@@ -214,7 +213,6 @@ def classPairGPOS(subtable, otlConv=None):
                 otlConv.leftSideTag)
     addClassDef(otlConv, subtable.ClassDef2.classDefs, None,
                 otlConv.rightSideTag)
-    return
 
 
 def markClassPOS(subtable, otlConv=None):
@@ -1954,12 +1952,12 @@ class OTLConverter:
                         lookup.LookupType == self.ExtensionIndex):
                     useExtension = " useExtension"
                 else:
-                    # XXX 'useExtension' is assigned here but never used
                     useExtension = ""
 
                 if li in self.seenLookup:
                     lookupName = self.seenLookup[li]
-                    writer.write("lookup %s%s;" % (lookupName, excludeDLFTtxt))
+                    writer.write("lookup %s%s%s;" % (lookupName, useExtension,
+                                                     excludeDLFTtxt))
                     excludeDLFTtxt = ""  # Only need to write it once.
                     writer.newline()
                 else:
@@ -1969,8 +1967,10 @@ class OTLConverter:
                                                   langSysKey[1].strip(),
                                                   nameIndex)
                     self.seenLookup[li] = lookupName
-                    writer.write("lookup %s%s%s;" % (lookupName, lookupFlagTxt,
-                                                     excludeDLFTtxt))
+                    writer.write("lookup %s%s%s%s;" % (lookupName,
+                                                       lookupFlagTxt,
+                                                       useExtension,
+                                                       excludeDLFTtxt))
                     excludeDLFTtxt = ""  # Only need to write it once.
                     writer.newline()
                     writer.indent()
