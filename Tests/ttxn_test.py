@@ -13,6 +13,7 @@ OTF_FONT = 'SourceSansPro-Black_subset.otf'
 TTF_FONT = 'SourceSansPro-Black_subset.ttf'
 OTF2_FONT = 'SourceSansPro-ExtraLightIt.otf'
 OTF3_FONT = 'SourceSansPro-Light.otf'
+TTF2_FONT = 'NotoNastaliqUrdu-Regular.ttf'
 
 data_dir_path = os.path.join(os.path.split(__file__)[0], TOOL + '_data')
 
@@ -35,6 +36,7 @@ def _get_expected_path(file_name):
     (['tGSUB'], OTF2_FONT, 'OTF2_GSUB_only.ttx'),
     (['tGPOS'], OTF3_FONT, 'OTF3_GPOS_only.ttx'),
     (['tGSUB'], OTF3_FONT, 'OTF3_GSUB_only.ttx'),
+    (['tGPOS'], TTF2_FONT, 'TTF2_GPOS_only.ttx'),
 ])
 def test_dump(args, font_filename, exp_filename):
     save_path = tempfile.mkstemp()[1]

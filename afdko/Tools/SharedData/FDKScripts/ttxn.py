@@ -231,7 +231,7 @@ def markMarkClassPOS(subtable, otlConv=None):
 
 
 def classContexGPOS(subtable, otlConv):
-    addClassDef(otlConv, subtable.ClassDef.classDefs)
+    addClassDef(otlConv, subtable.ClassDef.classDefs, None)
 
 
 def classChainContextGPOS(subtable, otlConv):
@@ -746,31 +746,28 @@ def ruleContextPOS(subtable, otlConv, context=None):
 
     elif subtable.Format == 2:
         subRules = []
-        for i in range(len(subtable.PosClassSet)):
-            ctxClassSet = subtable.PosClassSet[i]
+        for i, ctxClassSet in enumerate(subtable.PosClassSet):
             if not ctxClassSet:
                 continue
-            for j in range(len(ctxClassSet.PosClassRule)):
-                ctxClassRule = ctxClassSet.PosClassRule[j]
 
-                inputList = []
+            for ctxClassRule in ctxClassSet.PosClassRule:
                 className = otlConv.classesByLookup[otlConv.curLookupIndex,
                                                     otlConv.curSubTableIndex,
-                                                    i, otlConv.InputTag]
+                                                    i, None]
                 inputList = [className]
                 inputList2 = [otlConv.classesByClassName[className]]
-                for c in range(len(ctxClassRule.Input)):
-                    classIndex = ctxClassRule.Input[c]
+
+                for classIndex in ctxClassRule.Class:
                     className = otlConv.classesByLookup[
                         otlConv.curLookupIndex, otlConv.curSubTableIndex,
-                        classIndex, otlConv.InputTag]
+                        classIndex, None]
                     inputList.append(className)
                     inputList2.append(otlConv.classesByClassName[className])
                 inputTxt = "' ".join(inputList) + "'"
                 rule = "pos %s;" % (inputTxt)
+
                 subRules = []
-                for k in range(len(ctxClassRule.PosLookupRecord)):
-                    subsRec = ctxClassRule.PosLookupRecord[k]
+                for subsRec in ctxClassRule.PosLookupRecord:
                     if not subsRec:
                         continue
                     lookup = pLookupList[subsRec.LookupListIndex]
@@ -780,12 +777,10 @@ def ruleContextPOS(subtable, otlConv, context=None):
                     handler = otlConv.ruleHandlers[(lookupType)]
                     contextRec = ContextRecord(inputList,
                                                subsRec.SequenceIndex)
-                    for si in range(len(lookup.SubTable)):
-                        curSI = otlConv.curSubTableIndex
-                        otlConv.curSubTableIndex = si
-                        subtablerules = handler(lookup.SubTable[si], otlConv,
+
+                    for extensionPos in lookup.SubTable:
+                        subtablerules = handler(extensionPos, otlConv,
                                                 contextRec)
-                        otlConv.curSubTableIndex = curSI
                         subRules.extend(subtablerules)
                     otlConv.curLookupIndex = curLI
                 chainRules.append([rule, subRules])
@@ -899,8 +894,10 @@ def ruleChainContextPOS(subtable, otlConv, context=None):
             ctxClassSet = subtable.ChainSubClassSet[i]
             if not ctxClassSet:
                 continue
+
             for ctxClassRule in ctxClassSet.ChainPosRuleSet:
                 backTrackList = []
+
                 for c in range(len(ctxClassRule.Backtrack)):
                     classIndex = ctxClassRule.Backtrack[c]
                     className = otlConv.classesByLookup[
@@ -914,6 +911,7 @@ def ruleChainContextPOS(subtable, otlConv, context=None):
                     otlConv.InputTag]
                 inputList = [className]
                 inputList2 = [otlConv.classesByClassName[className]]
+
                 for classIndex in ctxClassRule.Input:
                     className = otlConv.classesByLookup[
                         otlConv.curLookupIndex, otlConv.curSubTableIndex,
