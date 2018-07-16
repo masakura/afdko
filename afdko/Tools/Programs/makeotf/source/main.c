@@ -254,10 +254,10 @@ static void printUsage(void) {
 		""
 		"Build:\n"
 		"    makeotf.lib version: %s \n"
-		"    OTF Library Version: %u\n",
+		"    OTF Library Version: %u.%u.%u\n",
 		progname,
 		MAKEOTF_VERSION,
-		HOT_VERSION);
+		   (HOT_VERSION >> 16) & 0xff, (HOT_VERSION >> 8) & 0xff, HOT_VERSION & 0xff);
 }
 
 /* Show usage information */

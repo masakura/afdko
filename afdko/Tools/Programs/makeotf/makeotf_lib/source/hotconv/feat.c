@@ -202,6 +202,7 @@ struct featCtx_ {
 #define GF_SEEN_GDEF_GLYPHCLASS (1 << 2) /* An explicit GDEF glyph class has been seen. */
 #define GF_SEEN_IGNORE_CLASS_FLAG (1 << 3) /* any lookup flag has been seen for ignoring any GDEF class. */
 #define GF_SEEN_MARK_CLASS_FLAG (1 << 4) /* any lookup flag has been seen for ignoring any GDEF class. */
+#define GF_SEEN_NON_DFLT_SCRIPT_FLAG (1 << 5) /* any lookup flag has been seen for ignoring any GDEF class. */
 
 	short fFlags;           /* Feature flags: set to 0 at every feat start: */
 #define FF_SEEN_SCRLANG (1 << 0) /* A script or language keyword has been seen */
@@ -2300,7 +2301,11 @@ static void addLangSys(Tag script, Tag language, int checkBeforeFeature) {
 		h->gFlags |= GF_SEEN_LANGSYS;
 	}
 	else if (script == DFLT_) {
-		featMsg(hotERROR, "The languagesystem DFLT dlft; statement must preceed all other language system statements.");
+		if (h->gFlags &GF_SEEN_NON_DFLT_SCRIPT_FLAG)
+			featMsg(hotERROR, "All references to the script tag DFLT must preceed all other script references.");
+	}
+	else {
+		h->gFlags |= GF_SEEN_NON_DFLT_SCRIPT_FLAG;
 	}
 
 	if (script == dflt_) {
@@ -2312,12 +2317,6 @@ static void addLangSys(Tag script, Tag language, int checkBeforeFeature) {
 		featMsg(hotWARNING, "'DFLT' is not a valid language tag for a languagesystem  statement; using 'dflt'.");
 		language = dflt_;
 	}
-
-	if ((script == DFLT_) && (language != dflt_)) {
-		featMsg(hotERROR, "The languagesystem script tag DFLT must be used only with the language tag dflt.");
-	}
-
-
 
 	/* First check if already exists */
 	for (i = 0; i < h->langSys.cnt; i++) {
@@ -2580,9 +2579,6 @@ static int checkTag(Tag tag, int type, int atStart) {
 				}
 				if (tag == dflt_) {
 					zzerr("dflt must precede language-specific behavior");
-				}
-				else if (h->curr.script == DFLT_) {
-					zzerr("DFLT script tag may be used only with the dlft language tag.");
 				}
 
 				if (tagAssign(tag, languageTag, 1) == 0) {
