@@ -233,7 +233,7 @@ def test_bug416():
     input_featurename = "bug416/bug416.fea"
     actual_path = _get_temp_file_path()
     try:
-        output = runner(CMD + ['-n', '-o',
+        runner(CMD + ['-n', '-o',
                       'f', '_{}'.format(_get_input_path(input_filename)),
                       'ff', '_{}'.format(_get_input_path(input_featurename)),
                       'o', '_{}'.format(actual_path)])
