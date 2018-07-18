@@ -4124,7 +4124,7 @@ static void fillMarkToBase(hotCtx g, GPOSCtx h) {
 		}     /* end for each base glyph entry */
 
 		/* For any glyph, the user may not have specified an anchor for any particular mark class.
-		   We will fill these in with default anchors at 0.0, but will also report a warning. */
+		   We will fill these in with NULL anchors, but will also report a warning. */
 
 		for (i = 0; i  < numBaseGlyphs; i++) {
 			int j;
@@ -4134,7 +4134,7 @@ static void fillMarkToBase(hotCtx g, GPOSCtx h) {
 			for (j = 0; j < fmt->ClassCount; j++) {
 				if (baseAnchorArray[j] == 0xFFFFFFFFL) {
                     char msg[1024];
-					baseAnchorArray[j] = getAnchoOffset(g, &kDefaultAnchor, fmt); /* this returns the offset from the start of the anchor list. To be adjusted later*/
+					baseAnchorArray[j] = 0;
                     featGlyphDump(g,   baseRec->gid, '\0', 0);
                     if (h->new.fileName != NULL) {
                         sprintf(msg, " [%s %ld]", h->new.fileName, baseRec->lineNum);
@@ -4142,8 +4142,8 @@ static void fillMarkToBase(hotCtx g, GPOSCtx h) {
                     else {
                         msg[0] = '\0';
                     }
-                    hotMsg(g, hotERROR, "MarkToBase or MarkToMark: A previous statement has already assigned the current mark class to another anchor point on the same glyph '%s'. Skipping rule. %s",
-                           g->note.array, msg);
+					hotMsg(g, hotWARNING, "MarkToBase or MarkToMark: The glyph '%s' does not have an anchor point for a mark class that was used in a previous statement in the same lookup table. Setting the anchor point offset to 0.",
+						   g->note.array, msg);
 				}
 			}
 		}
@@ -4226,7 +4226,11 @@ static void writeMarkToBase(hotCtx g, GPOSCtx h, Subtable *sub) {
 	for (i = 0; i < fmt->BaseArray_.BaseCount; i++) {
 		BaseRecord *baseRec = &fmt->BaseArray_.BaseRecord[i];
 		for (j = 0; j < markClassCnt; j++) {
-			OUT2((Offset)(baseRec->BaseAnchorArray[j] + anchorListOffset));
+			LOffset *baseAnchorArray = baseRec->BaseAnchorArray;
+			if (baseRec->BaseAnchorArray[j] == 0)
+				OUT2((Offset)0);
+			else
+				OUT2((Offset)(baseRec->BaseAnchorArray[j] + anchorListOffset));
 		}
 	}
 
